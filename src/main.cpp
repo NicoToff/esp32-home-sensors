@@ -11,10 +11,10 @@
 #define YELLOW_LED 25
 #define BLUE_LED 26
 #define ONE_WIRE_BUS 27
-// 1 min
-#define INTERVAL 60000
-#define MAX_RETRIES 12
-#define RETRY_DELAY 5000
+// 2 mins
+#define INTERVAL 120000
+#define MAX_RETRIES 5
+#define RETRY_DELAY 10000
 
 // Setup a oneWire instance to communicate with any OneWire device
 OneWire oneWire(ONE_WIRE_BUS);
