@@ -84,7 +84,7 @@ void setup()
 
 unsigned long previousMillis = INIT;
 // Init to ~0 Kelvin * 10 in Celsius
-int previous_temp = -2735;
+int previousTemp = -2735;
 void loop()
 {
     unsigned long currentMillis = millis();
@@ -103,18 +103,18 @@ void loop()
             ds18b20.requestTemperatures();
             // Temp is in Celsius
 
-            int current_temp = roundToHalfTimesTen(ds18b20.getTempCByIndex(0));
+            int currentTemp = roundToHalfTimesTen(ds18b20.getTempCByIndex(0));
 
             // If the new temperature is the same as the previous one, we don't post
-            if (current_temp == previous_temp)
+            if (currentTemp == previousTemp)
             {
                 break;
             }
 
-            previous_temp = current_temp;
+            previousTemp = currentTemp;
 
             digitalWrite(YELLOW_LED, HIGH);
-            int httpReturnCode = postData(createPayload(ATTIC, TEMPERATURE, current_temp));
+            int httpReturnCode = postData(createPayload(ATTIC, TEMPERATURE, currentTemp));
 
             // If the POST was successful, we turn off the LED and break out of the loop
             if (httpReturnCode == 200)
