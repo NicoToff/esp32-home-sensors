@@ -22,7 +22,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass oneWire reference to DallasTemperature library
 DallasTemperature ds18b20(&oneWire);
 
-String createPayload(SensorLocation location, SensorValueType type, float value)
+String createPayload(SensorLocation location, SensorValueType type, int value)
 {
     // Create the payload string using String concatenation
     String payload = "{\"requests\":[";
