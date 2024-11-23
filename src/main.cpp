@@ -24,9 +24,8 @@ DallasTemperature ds18b20(&oneWire);
 
 String createPayload(SensorLocation location, SensorValueType type, int value)
 {
-    // Create the payload string using String concatenation
     String payload = "{\"requests\":[";
-    payload += "{\"type\":\"execute\",\"stmt\":{\"sql\":\"INSERT INTO sensor_data (location, type, value) VALUES (" + String(location) + ", " + String(type) + ", " + String(value) + ")\"}},"; // Added formatting for value (2 decimals)
+    payload += "{\"type\":\"execute\",\"stmt\":{\"sql\":\"INSERT INTO sensor_data (location, type, value) VALUES (" + String(location) + ", " + String(type) + ", " + String(value) + ")\"}},";
     payload += "{\"type\":\"close\"}";
     payload += "]}";
 
