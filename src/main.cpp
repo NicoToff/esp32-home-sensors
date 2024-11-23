@@ -69,8 +69,8 @@ int postData(String payload)
 // Then, we multiply the value by 10 to store an INTEGER in the DB instead of a REAL
 int roundToHalfTimesTen(float num)
 {
-    int value = (int)(num * 2 + (num > 0 ? 0.5 : -0.5)) / 2;
-    return (value * 10);
+    int value = (int)(num * 2 + (num > 0 ? 0.5 : -0.5));
+    return (value * 10) / 2;
 }
 
 void setup()
