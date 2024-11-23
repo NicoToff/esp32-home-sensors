@@ -7,11 +7,12 @@
 #include <secrets.h>
 #include <sensor_constants.h>
 
+#define INIT 0
 #define YELLOW_LED 25
 #define BLUE_LED 26
 #define ONE_WIRE_BUS 27
-// 10 mins
-#define INTERVAL 600000
+// 1 min
+#define INTERVAL 60000
 #define MAX_RETRIES 12
 #define RETRY_DELAY 5000
 
@@ -64,6 +65,14 @@ int postData(String payload)
     return httpResponseCode;
 }
 
+// We round to the nearest .5 value because more precision is not needed for the temperate
+// Then, we multiply the value by 10 to store an INTEGER in the DB instead of a REAL
+int roundToHalfTimesTen(float num)
+{
+    int value = (int)(num * 2 + (num > 0 ? 0.5 : -0.5)) / 2;
+    return (value * 10);
+}
+
 void setup()
 {
     ds18b20.begin(); // Start up the library
@@ -73,12 +82,14 @@ void setup()
     pinMode(BLUE_LED, OUTPUT);
 }
 
-unsigned long previousMillis = 0;
+unsigned long previousMillis = INIT;
+// Init to ~0 Kelvin * 10 in Celsius
+int previous_temp = -2735;
 void loop()
 {
     unsigned long currentMillis = millis();
 
-    if (previousMillis == 0 || (currentMillis - previousMillis >= INTERVAL))
+    if (previousMillis == INIT || (currentMillis - previousMillis >= INTERVAL))
     {
         int retries = 0;
         int httpReturnCode = -1;
@@ -91,7 +102,16 @@ void loop()
 
             ds18b20.requestTemperatures();
             // Temp is in Celsius
-            float current_temp = ds18b20.getTempCByIndex(0);
+
+            int current_temp = roundToHalfTimesTen(ds18b20.getTempCByIndex(0));
+
+            // If the new temperature is the same as the previous one, we don't post
+            if (current_temp == previous_temp)
+            {
+                break;
+            }
+
+            previous_temp = current_temp;
 
             digitalWrite(YELLOW_LED, HIGH);
             int httpReturnCode = postData(createPayload(ATTIC, TEMPERATURE, current_temp));
