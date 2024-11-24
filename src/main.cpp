@@ -11,10 +11,15 @@
 #define YELLOW_LED 25
 #define BLUE_LED 26
 #define ONE_WIRE_BUS 27
-// 2 mins
-#define INTERVAL 120000
-#define MAX_RETRIES 5
+
+#define MAX_RETRIES 10
 #define RETRY_DELAY 10000
+
+/* **** Sensor configuration area **** */
+const SensorLocation SENSOR_LOCATION = ATTIC;
+const SensorValueType SENSOR_VALUE_TYPE = TEMPERATURE;
+const MeasurementInterval MEASUREMENT_INTERVAL = TEN_MINUTES;
+/* *********************************** */
 
 // Setup a oneWire instance to communicate with any OneWire device
 OneWire oneWire(ONE_WIRE_BUS);
@@ -86,9 +91,12 @@ unsigned long previousMillis = INIT;
 int previousTemp = -2735;
 void loop()
 {
+    // Small delay to avoid tight loops
+    delay(1000);
+
     unsigned long currentMillis = millis();
 
-    if (previousMillis == INIT || (currentMillis - previousMillis >= INTERVAL))
+    if (previousMillis == INIT || (currentMillis - previousMillis >= MEASUREMENT_INTERVAL))
     {
         int retries = 0;
         int httpReturnCode = -1;
@@ -113,7 +121,8 @@ void loop()
             previousTemp = currentTemp;
 
             digitalWrite(YELLOW_LED, HIGH);
-            int httpReturnCode = postData(createPayload(ATTIC, TEMPERATURE, currentTemp));
+            String payload = createPayload(SENSOR_LOCATION, SENSOR_VALUE_TYPE, currentTemp);
+            int httpReturnCode = postData(payload);
 
             // If the POST was successful, we turn off the LED and break out of the loop
             if (httpReturnCode == 200)
