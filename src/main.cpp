@@ -16,7 +16,7 @@
 #define RETRY_DELAY 10000
 
 /* **** Sensor configuration area **** */
-const SensorLocation SENSOR_LOCATION = ATTIC;
+const SensorLocation SENSOR_LOCATION = OFFICE;
 const SensorValueType SENSOR_VALUE_TYPE = TEMPERATURE;
 const MeasurementInterval MEASUREMENT_INTERVAL = TEN_MINUTES;
 /* *********************************** */

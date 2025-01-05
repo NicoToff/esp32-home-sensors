@@ -1,6 +1,7 @@
 enum SensorLocation
 {
-    ATTIC = 1
+    ATTIC = 1,
+    OFFICE = 2
 };
 
 enum SensorValueType
