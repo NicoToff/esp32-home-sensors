@@ -8,8 +8,8 @@
 #include <sensor_constants.h>
 
 #define INIT 0
-#define YELLOW_LED 25
-#define BLUE_LED 26
+#define NETWORK_LED 25
+#define WIFI_LED 26
 #define ONE_WIRE_BUS 27
 
 #define MAX_RETRIES 10
@@ -18,7 +18,7 @@
 /* **** Sensor configuration area **** */
 const SensorLocation SENSOR_LOCATION = OFFICE;
 const SensorValueType SENSOR_VALUE_TYPE = TEMPERATURE;
-const MeasurementInterval MEASUREMENT_INTERVAL = TEN_MINUTES;
+const MillisecondTimings MEASUREMENT_INTERVAL = TEN_MINUTES;
 /* *********************************** */
 
 // Setup a oneWire instance to communicate with any OneWire device
@@ -41,8 +41,9 @@ int postData(String payload)
 {
     HTTPClient http;
     http.begin(TURSO_ENDPOINT);
+    http.setConnectTimeout(TEN_SECONDS * 2); // timeout for establishing connections (default is 5000)
+    http.setTimeout(TEN_SECONDS * 2);        // milliseconds for operations like read/write (default is 5000)
 
-    // Send GET request
     http.addHeader("Content-Type", "application/json");
     http.addHeader("Authorization", TURSO_TOKEN);
 
@@ -82,8 +83,8 @@ void setup()
     ds18b20.begin(); // Start up the library
     // // UNCOMMENT FOR DEBUGGING
     // Serial.begin(9600);
-    pinMode(YELLOW_LED, OUTPUT);
-    pinMode(BLUE_LED, OUTPUT);
+    pinMode(NETWORK_LED, OUTPUT);
+    pinMode(WIFI_LED, OUTPUT);
 }
 
 unsigned long previousMillis = INIT;
@@ -92,7 +93,7 @@ int previousTemp = -2735;
 void loop()
 {
     // Small delay to avoid tight loops
-    delay(1000);
+    delay(ONE_SECOND);
 
     unsigned long currentMillis = millis();
 
@@ -101,33 +102,29 @@ void loop()
         int retries = 0;
         int httpReturnCode = -1;
         previousMillis = currentMillis;
-        while (retries < MAX_RETRIES)
+
+        // Temp is in Celsius
+        ds18b20.requestTemperatures();
+        float floatTemp = ds18b20.getTempCByIndex(0);
+        int currentTemp = roundToHalfTimesTen(floatTemp);
+
+        // If the new temperature is the same as the previous one, we don't POST
+        while (currentTemp != previousTemp && retries < MAX_RETRIES)
         {
-            digitalWrite(BLUE_LED, LOW);
+            digitalWrite(WIFI_LED, LOW);
             connectToWiFi(SSID, SSID_PASSWORD);
-            digitalWrite(BLUE_LED, HIGH);
-
-            ds18b20.requestTemperatures();
-            // Temp is in Celsius
-
-            int currentTemp = roundToHalfTimesTen(ds18b20.getTempCByIndex(0));
-
-            // If the new temperature is the same as the previous one, we don't post
-            if (currentTemp == previousTemp)
-            {
-                break;
-            }
+            digitalWrite(WIFI_LED, HIGH);
 
             previousTemp = currentTemp;
 
-            digitalWrite(YELLOW_LED, HIGH);
+            digitalWrite(NETWORK_LED, HIGH);
             String payload = createPayload(SENSOR_LOCATION, SENSOR_VALUE_TYPE, currentTemp);
             int httpReturnCode = postData(payload);
 
             // If the POST was successful, we turn off the LED and break out of the loop
             if (httpReturnCode == 200)
             {
-                digitalWrite(YELLOW_LED, LOW);
+                digitalWrite(NETWORK_LED, LOW);
                 break;
             }
             else

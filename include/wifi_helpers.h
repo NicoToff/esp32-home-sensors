@@ -12,7 +12,7 @@ extern void connectToWiFi(const char *ssid, const char *password)
     // Disconnect and free memory if previously connected
     WiFi.disconnect(true);
 
-    // Set WiFi to Station Mode (WIFI_STA is dafault, though)
+    // Set WiFi to Station Mode (WIFI_STA is default, though)
     WiFi.mode(WIFI_STA);
 
     // Start the WiFi connection
