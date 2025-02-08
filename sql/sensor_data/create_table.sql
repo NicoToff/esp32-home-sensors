@@ -8,5 +8,13 @@ CREATE TABLE sensor_data (
 
 CREATE TABLE sensor_checkins (
     sensor_id INTEGER PRIMARY KEY,
-    last_timestamp INTEGER DEFAULT (strftime('%s', 'now'))
+    last_timestamp INTEGER DEFAULT (unixepoch())
 );
+
+CREATE TABLE cache (
+    key      INTEGER PRIMARY KEY,  -- Unique INT identifier for the cached item
+    value    TEXT,                 -- Cached data (JSON, string, etc.)
+    expiry   INTEGER DEFAULT (unixepoch() + 900) -- Default expiry is 15 mins
+);
+CREATE INDEX idx_expiry_value ON cache(expiry, value);
+CREATE INDEX idx_expiry ON cache(expiry);
